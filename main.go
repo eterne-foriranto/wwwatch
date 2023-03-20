@@ -3,10 +3,16 @@ package main
 import (
 	"fmt"
 	"github.com/SevereCloud/vksdk/api"
+	"github.com/agnivade/levenshtein"
 	"os"
+	"strings"
 )
 
+const TeamName = "Охтыжёжик"
+const Cutoff = 3
+
 func main() {
+	lowerTeamName := strings.ToLower(TeamName)
 	token := os.Getenv("USER_TOKEN")
 	vk := api.NewVK(token)
 	params := api.Params{"group_id": "chgk_ivanovo"}
@@ -33,6 +39,11 @@ func main() {
 	}
 
 	for _, comment := range comments.Items {
-		fmt.Println(comment)
+		lowerCommentText := strings.ToLower(comment.Text)
+		distance := levenshtein.ComputeDistance(lowerCommentText, lowerTeamName)
+
+		if distance <= Cutoff {
+			fmt.Println(comment.Text)
+		}
 	}
 }
