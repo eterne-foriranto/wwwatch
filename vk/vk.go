@@ -9,6 +9,9 @@ import (
 	"strings"
 )
 
+const Domain = "https://vk.com/"
+const Prefix = "topic-"
+
 func readTopicId(fileName string) int {
 	fi, err := os.Open(fileName)
 
@@ -49,7 +52,8 @@ func writeTopicId(fileName string, topicId int) {
 }
 
 func processTopic(vk *api.VK, params api.Params, topicId int,
-	lowerTeamName string, cutoff int, fileName string) (string, bool) {
+	lowerTeamName string, cutoff int, fileName string, groupId int) (string,
+	bool) {
 
 	params["topic_id"] = topicId
 	comments, err := vk.BoardGetComments(params)
@@ -64,10 +68,15 @@ func processTopic(vk *api.VK, params api.Params, topicId int,
 
 		if distance <= cutoff {
 			writeTopicId(fileName, topicId)
-			return comment.Text, true
+			return getUrl(groupId, topicId, comment.ID), true
 		}
 	}
 	return "", false
+}
+
+func getUrl(groupId int, topicId int, commentId int) string {
+	return fmt.Sprintf("%v%v%v_%v?post=%v", Domain, Prefix, groupId, topicId,
+		commentId)
 }
 
 func CheckComment(cutoff int, fileName string, teamName string) (string, bool) {
@@ -94,7 +103,7 @@ func CheckComment(cutoff int, fileName string, teamName string) (string, bool) {
 
 	if topicId != processedTopicId {
 		return processTopic(vk, params, topicId, lowerTeamName, cutoff,
-			fileName)
+			fileName, groupId)
 	}
 
 	return "", false
