@@ -1,4 +1,4 @@
-package vk
+package main
 
 import (
 	"fmt"
@@ -79,7 +79,7 @@ func getUrl(groupId int, topicId int, commentId int) string {
 		commentId)
 }
 
-func CheckComment(cutoff int, fileName string, teamName string) (string, bool) {
+func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
 	lowerTeamName := strings.ToLower(teamName)
 	token := os.Getenv("USER_TOKEN")
 	vk := api.NewVK(token)
