@@ -7,6 +7,7 @@ require github.com/SevereCloud/vksdk v1.10.0
 require (
 	github.com/SevereCloud/vksdk/v2 v2.16.0 // indirect
 	github.com/agnivade/levenshtein v1.1.1 // indirect
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1 // indirect
 	github.com/klauspost/compress v1.16.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
