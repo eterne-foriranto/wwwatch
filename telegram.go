@@ -3,32 +3,11 @@ package main
 import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"os"
+	"strconv"
 )
 
-const TelegramTokenFileName = "tg_token.dat"
-const ChatID = 195336731
-
-func getTgToken(fileName string) string {
-	f, err := os.Open(fileName)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer f.Close()
-
-	b := make([]byte, 45)
-	_, err = f.Read(b)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-	return string(b)
-}
-
 func getBot() *tgbotapi.BotAPI {
-	token := getTgToken(TelegramTokenFileName)
+	token := getConfigValue("telegram", "token")
 	bot, err := tgbotapi.NewBotAPI(token)
 
 	if err != nil {
@@ -40,7 +19,13 @@ func getBot() *tgbotapi.BotAPI {
 }
 
 func send(text string) {
-	message := tgbotapi.NewMessage(ChatID, text)
+	chatID, err := strconv.Atoi(getConfigValue("telegram", "chat_id"))
+
+	if err != nil {
+		panic(err)
+	}
+
+	message := tgbotapi.NewMessage(int64(chatID), text)
 	bot := getBot()
 	bot.Send(message)
 }
