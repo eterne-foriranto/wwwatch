@@ -81,7 +81,7 @@ func getUrl(groupId int, topicId int, commentId int) string {
 
 func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
 	lowerTeamName := strings.ToLower(teamName)
-	token := os.Getenv("USER_TOKEN")
+	token := getConfigValue("vk", "token")
 	vk := api.NewVK(token)
 	params := api.Params{"group_id": "chgk_ivanovo"}
 	groups, err := vk.GroupsGetByID(params)
