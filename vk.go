@@ -83,7 +83,8 @@ func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
 	lowerTeamName := strings.ToLower(teamName)
 	token := getConfigValue("vk", "token")
 	vk := api.NewVK(token)
-	params := api.Params{"group_id": "chgk_ivanovo"}
+	groupCode := getConfigValue("vk", "group_code")
+	params := api.Params{"group_id": groupCode}
 	groups, err := vk.GroupsGetByID(params)
 
 	if err != nil {
