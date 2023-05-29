@@ -79,10 +79,14 @@ func getUrl(groupId int, topicId int, commentId int) string {
 		commentId)
 }
 
+func getVK() *api.VK {
+	token := getConfigValue("vk", "token")
+	return api.NewVK(token)
+}
+
 func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
 	lowerTeamName := strings.ToLower(teamName)
-	token := getConfigValue("vk", "token")
-	vk := api.NewVK(token)
+	vk := getVK()
 	groupCode := getConfigValue("vk", "group_code")
 	params := api.Params{"group_id": groupCode}
 	groups, err := vk.GroupsGetByID(params)
