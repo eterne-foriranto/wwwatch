@@ -84,19 +84,24 @@ func getVK() *api.VK {
 	return api.NewVK(token)
 }
 
-func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
-	lowerTeamName := strings.ToLower(teamName)
-	vk := getVK()
+func getGroupID() int {
 	groupCode := getConfigValue("vk", "group_code")
 	params := api.Params{"group_id": groupCode}
+	vk := getVK()
 	groups, err := vk.GroupsGetByID(params)
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	groupId := groups[0].ID
-	params["group_id"] = groupId
+	return groups[0].ID
+}
+
+func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
+	lowerTeamName := strings.ToLower(teamName)
+	vk := getVK()
+	groupId := getGroupID()
+	params := api.Params{"group_id": groupId}
 	topics, err := vk.BoardGetTopics(params)
 
 	if err != nil {
