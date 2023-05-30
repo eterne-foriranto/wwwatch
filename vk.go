@@ -13,27 +13,17 @@ const Domain = "https://vk.com/"
 const Prefix = "topic-"
 
 func readIntFromFile(fileName string) int {
-	fi, err := os.Open(fileName)
+	content, err := os.ReadFile(fileName)
 
 	if err != nil {
-		fmt.Println(err)
 	}
 
-	defer fi.Close()
-	b := make([]byte, 8)
-	_, err = fi.Read(b)
+	res, err2 := strconv.Atoi(string(content))
 
-	if err != nil {
-		fmt.Println(err)
+	if err2 != nil {
 	}
 
-	topicId, err := strconv.Atoi(string(b))
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return topicId
+	return res
 }
 
 func writeIntToFile(fileName string, entireInt int) {
