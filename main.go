@@ -21,15 +21,16 @@ func getConfigValue(sectionName string, key string) string {
 }
 
 func main() {
+	processPost()
 	teamName := getConfigValue("main", "team_name")
 	cutoff, err := strconv.Atoi(getConfigValue("main", "cutoff"))
-	filename := getConfigValue("main", "filename")
+	topicIdFilename := getConfigValue("main", "topic_id_filename")
 
 	if err != nil {
 		panic(err)
 	}
 
-	url, status := checkComment(cutoff, filename, teamName)
+	url, status := checkComment(cutoff, topicIdFilename, teamName)
 
 	if status {
 		send(url)

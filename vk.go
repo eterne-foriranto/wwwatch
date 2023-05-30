@@ -12,31 +12,21 @@ import (
 const Domain = "https://vk.com/"
 const Prefix = "topic-"
 
-func readTopicId(fileName string) int {
-	fi, err := os.Open(fileName)
+func readIntFromFile(fileName string) int {
+	content, err := os.ReadFile(fileName)
 
 	if err != nil {
-		fmt.Println(err)
 	}
 
-	defer fi.Close()
-	b := make([]byte, 8)
-	_, err = fi.Read(b)
+	res, err2 := strconv.Atoi(string(content))
 
-	if err != nil {
-		fmt.Println(err)
+	if err2 != nil {
 	}
 
-	topicId, err := strconv.Atoi(string(b))
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return topicId
+	return res
 }
 
-func writeTopicId(fileName string, topicId int) {
+func writeIntToFile(fileName string, entireInt int) {
 	f, err := os.Create(fileName)
 
 	if err != nil {
@@ -44,7 +34,7 @@ func writeTopicId(fileName string, topicId int) {
 	}
 
 	defer f.Close()
-	_, err = f.WriteString(strconv.Itoa(topicId))
+	_, err = f.WriteString(strconv.Itoa(entireInt))
 
 	if err != nil {
 		fmt.Println(err)
@@ -52,7 +42,7 @@ func writeTopicId(fileName string, topicId int) {
 }
 
 func processTopic(vk *api.VK, params api.Params, topicId int,
-	lowerTeamName string, cutoff int, fileName string, groupId int) (string,
+	lowerTeamName string, cutoff int, topicIdFileName string, groupId int) (string,
 	bool) {
 
 	params["topic_id"] = topicId
@@ -67,7 +57,7 @@ func processTopic(vk *api.VK, params api.Params, topicId int,
 		distance := levenshtein.ComputeDistance(lowerCommentText, lowerTeamName)
 
 		if distance <= cutoff {
-			writeTopicId(fileName, topicId)
+			writeIntToFile(topicIdFileName, topicId)
 			return getUrl(groupId, topicId, comment.ID), true
 		}
 	}
@@ -79,20 +69,29 @@ func getUrl(groupId int, topicId int, commentId int) string {
 		commentId)
 }
 
-func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
-	lowerTeamName := strings.ToLower(teamName)
+func getVK() *api.VK {
 	token := getConfigValue("vk", "token")
-	vk := api.NewVK(token)
+	return api.NewVK(token)
+}
+
+func getGroupID() int {
 	groupCode := getConfigValue("vk", "group_code")
 	params := api.Params{"group_id": groupCode}
+	vk := getVK()
 	groups, err := vk.GroupsGetByID(params)
 
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	groupId := groups[0].ID
-	params["group_id"] = groupId
+	return groups[0].ID
+}
+
+func checkComment(cutoff int, topicIdFileName string, teamName string) (string, bool) {
+	lowerTeamName := strings.ToLower(teamName)
+	vk := getVK()
+	groupId := getGroupID()
+	params := api.Params{"group_id": groupId}
 	topics, err := vk.BoardGetTopics(params)
 
 	if err != nil {
@@ -100,11 +99,11 @@ func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
 	}
 
 	topicId := topics.Items[0].ID
-	processedTopicId := readTopicId(fileName)
+	processedTopicId := readIntFromFile(topicIdFileName)
 
 	if topicId != processedTopicId {
 		return processTopic(vk, params, topicId, lowerTeamName, cutoff,
-			fileName, groupId)
+			topicIdFileName, groupId)
 	}
 
 	return "", false
