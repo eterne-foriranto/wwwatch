@@ -12,7 +12,7 @@ import (
 const Domain = "https://vk.com/"
 const Prefix = "topic-"
 
-func readTopicId(fileName string) int {
+func readIntFromFile(fileName string) int {
 	fi, err := os.Open(fileName)
 
 	if err != nil {
@@ -36,7 +36,7 @@ func readTopicId(fileName string) int {
 	return topicId
 }
 
-func writeTopicId(fileName string, topicId int) {
+func writeIntToFile(fileName string, entireInt int) {
 	f, err := os.Create(fileName)
 
 	if err != nil {
@@ -44,7 +44,7 @@ func writeTopicId(fileName string, topicId int) {
 	}
 
 	defer f.Close()
-	_, err = f.WriteString(strconv.Itoa(topicId))
+	_, err = f.WriteString(strconv.Itoa(entireInt))
 
 	if err != nil {
 		fmt.Println(err)
@@ -52,7 +52,7 @@ func writeTopicId(fileName string, topicId int) {
 }
 
 func processTopic(vk *api.VK, params api.Params, topicId int,
-	lowerTeamName string, cutoff int, fileName string, groupId int) (string,
+	lowerTeamName string, cutoff int, topicIdFileName string, groupId int) (string,
 	bool) {
 
 	params["topic_id"] = topicId
@@ -67,7 +67,7 @@ func processTopic(vk *api.VK, params api.Params, topicId int,
 		distance := levenshtein.ComputeDistance(lowerCommentText, lowerTeamName)
 
 		if distance <= cutoff {
-			writeTopicId(fileName, topicId)
+			writeIntToFile(topicIdFileName, topicId)
 			return getUrl(groupId, topicId, comment.ID), true
 		}
 	}
@@ -97,7 +97,7 @@ func getGroupID() int {
 	return groups[0].ID
 }
 
-func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
+func checkComment(cutoff int, topicIdFileName string, teamName string) (string, bool) {
 	lowerTeamName := strings.ToLower(teamName)
 	vk := getVK()
 	groupId := getGroupID()
@@ -109,11 +109,11 @@ func checkComment(cutoff int, fileName string, teamName string) (string, bool) {
 	}
 
 	topicId := topics.Items[0].ID
-	processedTopicId := readTopicId(fileName)
+	processedTopicId := readIntFromFile(topicIdFileName)
 
 	if topicId != processedTopicId {
 		return processTopic(vk, params, topicId, lowerTeamName, cutoff,
-			fileName, groupId)
+			topicIdFileName, groupId)
 	}
 
 	return "", false
