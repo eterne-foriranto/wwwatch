@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/astaxie/beego/config"
-	"strconv"
 )
 
 func getConfigValue(sectionName string, key string) string {
@@ -21,18 +20,8 @@ func getConfigValue(sectionName string, key string) string {
 }
 
 func main() {
-	processPost()
-	teamName := getConfigValue("main", "team_name")
-	cutoff, err := strconv.Atoi(getConfigValue("main", "cutoff"))
-	topicIdFilename := getConfigValue("main", "topic_id_filename")
-
-	if err != nil {
-		panic(err)
-	}
-
-	url, status := checkComment(cutoff, topicIdFilename, teamName)
-
-	if status {
-		send(url)
-	}
+	announcement := Announcement{"wall-"}
+	announcement.run()
+	comment := Comment{"topic-"}
+	comment.run()
 }
