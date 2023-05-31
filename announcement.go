@@ -7,6 +7,29 @@ import (
 	"strings"
 )
 
+type Announcement struct {
+	prefix string
+}
+
+func (a Announcement) getUrl(postId int) string {
+	return fmt.Sprintf("%v%v%v_%v", Domain, a.prefix, getGroupID(), postId)
+}
+
+func (a Announcement) run() {
+	timestampFilename := getConfigValue("main", "timestamp_filename")
+	processedTimestamp := readIntFromFile(timestampFilename)
+	post := getLatestPost()
+
+	if post.Date > processedTimestamp || processedTimestamp == 0 { // 0 means that there was no file
+		if keyPresents(post.Text) {
+			url := a.getUrl(post.ID)
+			send(url)
+		}
+
+		writeIntToFile(timestampFilename, post.Date)
+	}
+}
+
 func getLatestPost() object2.WallWallpost {
 	params := api.Params{
 		"domain": getConfigValue("vk", "group_code"),
@@ -24,19 +47,4 @@ func getLatestPost() object2.WallWallpost {
 
 func keyPresents(text string) bool {
 	return strings.Contains(text, getConfigValue("main", "post_key"))
-}
-
-func processPost() {
-	timestampFilename := getConfigValue("main", "timestamp_filename")
-	processedTimestamp := readIntFromFile(timestampFilename)
-	post := getLatestPost()
-
-	if post.Date > processedTimestamp || processedTimestamp == 0 { // 0 means that there was no file
-		if keyPresents(post.Text) {
-			url := fmt.Sprintf("%v%v%v_%v", Domain, "wall-", getGroupID(), post.ID)
-			send(url)
-		}
-
-		writeIntToFile(timestampFilename, post.Date)
-	}
 }
